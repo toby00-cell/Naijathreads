@@ -50,34 +50,15 @@ router.get('/me', requireAuth, (req, res) => {
   res.json({ user: req.user.toSafeJSON() });
 });
 
-router.post('/seed-admin', async (req, res, next) => {
+router.post('/login', async (req, res, next) => {
   try {
-    await User.deleteOne({ email: 'bright8804@bazeuniversity.edu.ng' });
-    const passwordHash = await bcrypt.hash('Admin1234', 10);
-    const user = await User.create({
-      name: 'Admin',
-      email: 'bright8804@bazeuniversity.edu.ng',
-      passwordHash,
-      role: 'admin'
-    });
-    res.status(201).json({ message: 'Admin recreated', user: user.toSafeJSON() });
+    const data = loginSchema.parse(req.body);
+    const user = await User.findOne({ email: data.email });
+    if (!user) return res.status(401).json({ error: 'Invalid email or password.' });
+    const ok = await bcrypt.compare(data.password, user.passwordHash);
+    if (!ok) return res.status(401).json({ error: 'Invalid email or password.' });
+    res.json({ token: signToken(user), user: user.toSafeJSON() });
   } catch (e) { next(e); }
-});
-
-router.get('/debug-admin', async (req, res) => {
-  const user = await User.findOne({ email: 'bright8804@bazeuniversity.edu.ng' });
-  res.json({ 
-    found: !!user, 
-    hasHash: !!user?.passwordHash,
-    hashLength: user?.passwordHash?.length,
-    role: user?.role
-  });
-});
-
-router.get('/debug-bcrypt', async (req, res) => {
-  const user = await User.findOne({ email: 'bright8804@bazeuniversity.edu.ng' });
-  const ok = await bcrypt.compare('Admin1234', user.passwordHash);
-  res.json({ passwordMatches: ok });
 });
 
 export default router;
