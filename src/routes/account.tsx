@@ -148,11 +148,31 @@ function AuthForms() {
 }
 
 function Input({ label, name, type = "text", required, minLength }: { label: string; name: string; type?: string; required?: boolean; minLength?: number }) {
+  const [show, setShow] = useState(false);
+  const isPassword = type === "password";
+
   return (
     <label className="block">
       <span className="font-display text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{label}</span>
-      <input name={name} type={type} required={required} minLength={minLength} maxLength={255}
-        className="mt-1 w-full rounded-md border border-border bg-card px-3 py-2 text-sm outline-none focus:border-primary" />
+      <div className="relative mt-1">
+        <input
+          name={name}
+          type={isPassword ? (show ? "text" : "password") : type}
+          required={required}
+          minLength={minLength}
+          maxLength={255}
+          className="w-full rounded-md border border-border bg-card px-3 py-2 pr-10 text-sm outline-none focus:border-primary"
+        />
+        {isPassword && (
+          <button
+            type="button"
+            onClick={() => setShow(!show)}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground hover:text-primary"
+          >
+            {show ? "Hide" : "Show"}
+          </button>
+        )}
+      </div>
     </label>
   );
 }
