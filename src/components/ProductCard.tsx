@@ -1,8 +1,11 @@
 import { type Product, formatNGN } from "@/data/products";
+import { type ApiProduct } from "@/services/products.api";
 import { Link } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
 
-export function ProductCard({ product }: { product: Product }) {
+type AnyProduct = Product | ApiProduct;
+
+export function ProductCard({ product }: { product: AnyProduct }) {
   const onSale = typeof product.originalPrice === "number" && product.originalPrice > product.price;
   const discount = onSale
     ? Math.round(((product.originalPrice! - product.price) / product.originalPrice!) * 100)

@@ -2,7 +2,8 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
 import { useMemo } from "react";
-import { PRODUCTS, CATEGORIES, type Category } from "@/data/products";
+import { CATEGORIES, type Category } from "@/data/products";
+import { useProducts } from "@/hooks/useProducts";
 import { ProductCard } from "@/components/ProductCard";
 import { Search, X } from "lucide-react";
 
@@ -37,15 +38,18 @@ function ShopPage() {
     navigate({ search: (prev: typeof search) => ({ ...prev, ...patch }) });
   };
 
+  const { data } = useProducts();
+  const allProducts = data?.items ?? [];
+
   const allSizes = useMemo(() => {
     const s = new Set<string>();
-    PRODUCTS.forEach((p) => p.sizes.forEach((x) => s.add(x)));
+    allProducts.forEach((p) => p.sizes.forEach((x) => s.add(x)));
     return Array.from(s);
-  }, []);
+  }, [allProducts]);
 
   const filtered = useMemo(() => {
     const q = search.q.trim().toLowerCase();
-    let list = PRODUCTS.filter((p) => {
+    let list = allProducts.filter((p) => {
       if (search.category && p.category !== search.category) return false;
       if (p.price < search.min || p.price > search.max) return false;
       if (search.size && !p.sizes.includes(search.size)) return false;
@@ -56,13 +60,12 @@ function ShopPage() {
     if (search.sort === "price-desc") list = [...list].sort((a, b) => b.price - a.price);
     if (search.sort === "newest") list = [...list].sort((a, b) => Number(!!b.isNew) - Number(!!a.isNew));
     return list;
-  }, [search]);
+  }, [search, allProducts]);
 
   const activeCat = CATEGORIES.find((c) => c.slug === search.category);
 
   return (
     <>
-      {/* Page header */}
       <section className="bg-hero-bg">
         <div className="mx-auto max-w-7xl px-4 py-12">
           <p className="font-display text-xs font-semibold uppercase tracking-wider text-primary">Shop</p>
@@ -72,8 +75,6 @@ function ShopPage() {
           <p className="mt-2 text-sm text-muted-foreground">
             {filtered.length} item{filtered.length !== 1 ? "s" : ""} available
           </p>
-
-          {/* Search bar */}
           <div className="relative mt-6 max-w-xl">
             <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <input
@@ -92,8 +93,6 @@ function ShopPage() {
               </button>
             )}
           </div>
-
-          {/* Category chips */}
           <div className="mt-6 flex flex-wrap gap-2">
             <Chip active={!search.category} onClick={() => update({ category: undefined })}>All</Chip>
             {CATEGORIES.map((c) => (
@@ -105,10 +104,8 @@ function ShopPage() {
         </div>
       </section>
 
-      {/* Grid + sidebar */}
       <section className="mx-auto grid max-w-7xl gap-8 px-4 py-12 lg:grid-cols-[260px_1fr]">
         <aside className="space-y-8">
-          {/* Price */}
           <div>
             <h3 className="font-display text-sm font-bold uppercase tracking-wider">Price Range</h3>
             <div className="mt-4 space-y-3">
@@ -142,7 +139,6 @@ function ShopPage() {
             </div>
           </div>
 
-          {/* Size */}
           <div>
             <h3 className="font-display text-sm font-bold uppercase tracking-wider">Size</h3>
             <div className="mt-4 flex flex-wrap gap-1.5">
@@ -171,7 +167,6 @@ function ShopPage() {
         </aside>
 
         <div>
-          {/* Sort bar */}
           <div className="mb-6 flex items-center justify-between border-b border-border pb-4">
             <p className="text-sm text-muted-foreground">Showing <span className="font-semibold text-foreground">{filtered.length}</span> products</p>
             <label className="flex items-center gap-2 text-sm">
