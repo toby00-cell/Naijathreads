@@ -37,8 +37,8 @@ export function SiteFooter() {
           </p>
           <div className="mt-5 flex gap-3">
             <a href="https://instagram.com" aria-label="Instagram" className="grid h-9 w-9 place-items-center rounded-full border border-white/15 hover:bg-primary hover:border-primary"><Instagram className="h-4 w-4" /></a>
-            <a href="https://wa.me/2348000000000" aria-label="WhatsApp" className="grid h-9 w-9 place-items-center rounded-full border border-white/15 hover:bg-primary hover:border-primary"><MessageCircle className="h-4 w-4" /></a>
-            <a href="mailto:hello@naijathreads.ng" aria-label="Email" className="grid h-9 w-9 place-items-center rounded-full border border-white/15 hover:bg-primary hover:border-primary"><Mail className="h-4 w-4" /></a>
+            <a href="https://wa.me/2349040522602" aria-label="WhatsApp" className="grid h-9 w-9 place-items-center rounded-full border border-white/15 hover:bg-primary hover:border-primary"><MessageCircle className="h-4 w-4" /></a>
+            <a href="mailto:brightjoel196@gmail.com" aria-label="Email" className="grid h-9 w-9 place-items-center rounded-full border border-white/15 hover:bg-primary hover:border-primary"><Mail className="h-4 w-4" /></a>
           </div>
         </div>
 
@@ -57,10 +57,10 @@ export function SiteFooter() {
         <div>
           <h4 className="font-display text-sm font-semibold uppercase tracking-wide text-primary">Help</h4>
           <ul className="mt-4 space-y-2 text-sm opacity-80">
-            <li>Shipping & Delivery</li>
-            <li>Returns & Exchanges</li>
-            <li>Size Guide</li>
-            <li>Contact Us</li>
+            <li><Link to="/shipping" className="hover:text-primary">Shipping & Delivery</Link></li>
+            <li><Link to="/returns" className="hover:text-primary">Returns & Exchanges</Link></li>
+            <li><Link to="/size-guide" className="hover:text-primary">Size Guide</Link></li>
+            <li><Link to="/contact" className="hover:text-primary">Contact Us</Link></li>
           </ul>
         </div>
 

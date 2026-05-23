@@ -114,7 +114,7 @@ function Index() {
       <section className="bg-primary text-primary-foreground">
         <div className="mx-auto flex max-w-7xl flex-col items-start justify-between gap-6 px-4 py-12 md:flex-row md:items-center">
           <div>
-            <h3 className="font-display text-2xl font-extrabold md:text-3xl">Free delivery within Lagos on orders above ₦50,000</h3>
+            <h3 className="font-display text-2xl font-extrabold md:text-3xl">Free delivery within Abuja on orders above ₦50,000</h3>
             <p className="mt-1 text-sm opacity-90">Nationwide shipping available · Pay on delivery in select cities</p>
           </div>
           <Link to="/sale" className="inline-flex items-center gap-2 bg-ink px-6 py-3 font-display text-sm font-bold uppercase tracking-wider text-ink-foreground hover:bg-ink/80">

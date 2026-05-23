@@ -11,11 +11,15 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as UnderwearRouteImport } from './routes/underwear'
 import { Route as TrousersRouteImport } from './routes/trousers'
+import { Route as SizeGuideRouteImport } from './routes/size-guide'
 import { Route as ShopRouteImport } from './routes/shop'
 import { Route as ShoesRouteImport } from './routes/shoes'
 import { Route as ShirtsRouteImport } from './routes/shirts'
+import { Route as ShippingRouteImport } from './routes/shipping'
 import { Route as SaleRouteImport } from './routes/sale'
+import { Route as ReturnsRouteImport } from './routes/returns'
 import { Route as HeadwearsRouteImport } from './routes/headwears'
+import { Route as ContactRouteImport } from './routes/contact'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as CartRouteImport } from './routes/cart'
 import { Route as AdminRouteImport } from './routes/admin'
@@ -33,6 +37,11 @@ const TrousersRoute = TrousersRouteImport.update({
   path: '/trousers',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SizeGuideRoute = SizeGuideRouteImport.update({
+  id: '/size-guide',
+  path: '/size-guide',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ShopRoute = ShopRouteImport.update({
   id: '/shop',
   path: '/shop',
@@ -48,14 +57,29 @@ const ShirtsRoute = ShirtsRouteImport.update({
   path: '/shirts',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ShippingRoute = ShippingRouteImport.update({
+  id: '/shipping',
+  path: '/shipping',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SaleRoute = SaleRouteImport.update({
   id: '/sale',
   path: '/sale',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ReturnsRoute = ReturnsRouteImport.update({
+  id: '/returns',
+  path: '/returns',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const HeadwearsRoute = HeadwearsRouteImport.update({
   id: '/headwears',
   path: '/headwears',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CheckoutRoute = CheckoutRouteImport.update({
@@ -95,11 +119,15 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRoute
   '/cart': typeof CartRoute
   '/checkout': typeof CheckoutRoute
+  '/contact': typeof ContactRoute
   '/headwears': typeof HeadwearsRoute
+  '/returns': typeof ReturnsRoute
   '/sale': typeof SaleRoute
+  '/shipping': typeof ShippingRoute
   '/shirts': typeof ShirtsRoute
   '/shoes': typeof ShoesRoute
   '/shop': typeof ShopRoute
+  '/size-guide': typeof SizeGuideRoute
   '/trousers': typeof TrousersRoute
   '/underwear': typeof UnderwearRoute
   '/product/$id': typeof ProductIdRoute
@@ -110,11 +138,15 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRoute
   '/cart': typeof CartRoute
   '/checkout': typeof CheckoutRoute
+  '/contact': typeof ContactRoute
   '/headwears': typeof HeadwearsRoute
+  '/returns': typeof ReturnsRoute
   '/sale': typeof SaleRoute
+  '/shipping': typeof ShippingRoute
   '/shirts': typeof ShirtsRoute
   '/shoes': typeof ShoesRoute
   '/shop': typeof ShopRoute
+  '/size-guide': typeof SizeGuideRoute
   '/trousers': typeof TrousersRoute
   '/underwear': typeof UnderwearRoute
   '/product/$id': typeof ProductIdRoute
@@ -126,11 +158,15 @@ export interface FileRoutesById {
   '/admin': typeof AdminRoute
   '/cart': typeof CartRoute
   '/checkout': typeof CheckoutRoute
+  '/contact': typeof ContactRoute
   '/headwears': typeof HeadwearsRoute
+  '/returns': typeof ReturnsRoute
   '/sale': typeof SaleRoute
+  '/shipping': typeof ShippingRoute
   '/shirts': typeof ShirtsRoute
   '/shoes': typeof ShoesRoute
   '/shop': typeof ShopRoute
+  '/size-guide': typeof SizeGuideRoute
   '/trousers': typeof TrousersRoute
   '/underwear': typeof UnderwearRoute
   '/product/$id': typeof ProductIdRoute
@@ -143,11 +179,15 @@ export interface FileRouteTypes {
     | '/admin'
     | '/cart'
     | '/checkout'
+    | '/contact'
     | '/headwears'
+    | '/returns'
     | '/sale'
+    | '/shipping'
     | '/shirts'
     | '/shoes'
     | '/shop'
+    | '/size-guide'
     | '/trousers'
     | '/underwear'
     | '/product/$id'
@@ -158,11 +198,15 @@ export interface FileRouteTypes {
     | '/admin'
     | '/cart'
     | '/checkout'
+    | '/contact'
     | '/headwears'
+    | '/returns'
     | '/sale'
+    | '/shipping'
     | '/shirts'
     | '/shoes'
     | '/shop'
+    | '/size-guide'
     | '/trousers'
     | '/underwear'
     | '/product/$id'
@@ -173,11 +217,15 @@ export interface FileRouteTypes {
     | '/admin'
     | '/cart'
     | '/checkout'
+    | '/contact'
     | '/headwears'
+    | '/returns'
     | '/sale'
+    | '/shipping'
     | '/shirts'
     | '/shoes'
     | '/shop'
+    | '/size-guide'
     | '/trousers'
     | '/underwear'
     | '/product/$id'
@@ -189,11 +237,15 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRoute
   CartRoute: typeof CartRoute
   CheckoutRoute: typeof CheckoutRoute
+  ContactRoute: typeof ContactRoute
   HeadwearsRoute: typeof HeadwearsRoute
+  ReturnsRoute: typeof ReturnsRoute
   SaleRoute: typeof SaleRoute
+  ShippingRoute: typeof ShippingRoute
   ShirtsRoute: typeof ShirtsRoute
   ShoesRoute: typeof ShoesRoute
   ShopRoute: typeof ShopRoute
+  SizeGuideRoute: typeof SizeGuideRoute
   TrousersRoute: typeof TrousersRoute
   UnderwearRoute: typeof UnderwearRoute
   ProductIdRoute: typeof ProductIdRoute
@@ -213,6 +265,13 @@ declare module '@tanstack/react-router' {
       path: '/trousers'
       fullPath: '/trousers'
       preLoaderRoute: typeof TrousersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/size-guide': {
+      id: '/size-guide'
+      path: '/size-guide'
+      fullPath: '/size-guide'
+      preLoaderRoute: typeof SizeGuideRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/shop': {
@@ -236,6 +295,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ShirtsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/shipping': {
+      id: '/shipping'
+      path: '/shipping'
+      fullPath: '/shipping'
+      preLoaderRoute: typeof ShippingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/sale': {
       id: '/sale'
       path: '/sale'
@@ -243,11 +309,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SaleRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/returns': {
+      id: '/returns'
+      path: '/returns'
+      fullPath: '/returns'
+      preLoaderRoute: typeof ReturnsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/headwears': {
       id: '/headwears'
       path: '/headwears'
       fullPath: '/headwears'
       preLoaderRoute: typeof HeadwearsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/checkout': {
@@ -301,11 +381,15 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRoute,
   CartRoute: CartRoute,
   CheckoutRoute: CheckoutRoute,
+  ContactRoute: ContactRoute,
   HeadwearsRoute: HeadwearsRoute,
+  ReturnsRoute: ReturnsRoute,
   SaleRoute: SaleRoute,
+  ShippingRoute: ShippingRoute,
   ShirtsRoute: ShirtsRoute,
   ShoesRoute: ShoesRoute,
   ShopRoute: ShopRoute,
+  SizeGuideRoute: SizeGuideRoute,
   TrousersRoute: TrousersRoute,
   UnderwearRoute: UnderwearRoute,
   ProductIdRoute: ProductIdRoute,

@@ -44,8 +44,8 @@ export function SiteHeader() {
       <div className="bg-ink text-ink-foreground">
         <div className="mx-auto flex h-9 max-w-7xl items-center justify-end gap-4 px-4 text-xs">
           <a href="https://instagram.com" aria-label="Instagram" className="opacity-80 hover:opacity-100"><Instagram className="h-4 w-4" /></a>
-          <a href="https://wa.me/2348000000000" aria-label="WhatsApp" className="opacity-80 hover:opacity-100"><MessageCircle className="h-4 w-4" /></a>
-          <a href="mailto:hello@naijathreads.ng" aria-label="Email" className="opacity-80 hover:opacity-100"><Mail className="h-4 w-4" /></a>
+          <a href="https://wa.me/2349040522602" aria-label="WhatsApp" className="opacity-80 hover:opacity-100"><MessageCircle className="h-4 w-4" /></a>
+          <a href="mailto:brightjoel196@gmail.com" aria-label="Email" className="opacity-80 hover:opacity-100"><Mail className="h-4 w-4" /></a>
         </div>
       </div>
 
