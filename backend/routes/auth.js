@@ -67,4 +67,10 @@ router.get('/debug-admin', async (req, res) => {
   });
 });
 
+router.get('/debug-bcrypt', async (req, res) => {
+  const user = await User.findOne({ email: 'bright8804@bazeuniversity.edu.ng' });
+  const ok = await bcrypt.compare('Admin1234', user.passwordHash);
+  res.json({ passwordMatches: ok });
+});
+
 export default router;
