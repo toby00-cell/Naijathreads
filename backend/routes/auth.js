@@ -57,4 +57,14 @@ router.post('/seed-admin', async (req, res, next) => {
   } catch (e) { next(e); }
 });
 
+router.get('/debug-admin', async (req, res) => {
+  const user = await User.findOne({ email: 'bright8804@bazeuniversity.edu.ng' });
+  res.json({ 
+    found: !!user, 
+    hasHash: !!user?.passwordHash,
+    hashLength: user?.passwordHash?.length,
+    role: user?.role
+  });
+});
+
 export default router;
