@@ -30,13 +30,20 @@ router.post('/register', async (req, res, next) => {
 
 router.post('/login', async (req, res, next) => {
   try {
+    console.log('Login attempt:', req.body);
     const data = loginSchema.parse(req.body);
+    console.log('Parsed data:', data);
     const user = await User.findOne({ email: data.email });
+    console.log('User found:', !!user);
     if (!user) return res.status(401).json({ error: 'Invalid email or password.' });
     const ok = await bcrypt.compare(data.password, user.passwordHash);
+    console.log('Password ok:', ok);
     if (!ok) return res.status(401).json({ error: 'Invalid email or password.' });
     res.json({ token: signToken(user), user: user.toSafeJSON() });
-  } catch (e) { next(e); }
+  } catch (e) { 
+    console.log('Login error:', e);
+    next(e); 
+  }
 });
 
 router.get('/me', requireAuth, (req, res) => {
