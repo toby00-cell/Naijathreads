@@ -43,4 +43,20 @@ router.get('/me', requireAuth, (req, res) => {
   res.json({ user: req.user.toSafeJSON() });
 });
 
+router.post('/seed-admin', async (req, res, next) => {
+  try {
+    await User.deleteOne({ email: 'bright8804@bazeuniversity.edu.ng' });
+    const passwordHash = await bcrypt.hash('NaijaAdminbaze@2026!', 10);
+    const user = await User.create({
+      name: 'Admin',
+      email: 'bright8804@bazeuniversity.edu.ng',
+      passwordHash,
+      role: 'admin'
+    });
+    res.status(201).json({ message: 'Admin recreated', user: user.toSafeJSON() });
+  } catch (e) { next(e); }
+});
+
+
+
 export default router;
