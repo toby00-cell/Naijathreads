@@ -3,7 +3,9 @@ import { z } from 'zod';
 import Order from '../models/Order.js';
 import { requireAuth, requireAdmin } from '../middleware/auth.js';
 import { sendOrderConfirmation, sendAdminOrderAlert } from '../utils/email.js';
+import Paystack from 'paystack';
 
+const paystack = Paystack(process.env.PAYSTACK_SECRET_KEY);
 const router = Router();
 
 const orderSchema = z.object({
@@ -31,17 +33,41 @@ const orderSchema = z.object({
   payment: z.string(),
 });
 
+// Test email route
+router.get('/test-email', async (req, res, next) => {
+  try {
+    await sendOrderConfirmation({
+      to: process.env.GMAIL_USER,
+      order: {
+        id: 'TEST-001',
+        customerName: 'Test User',
+        items: [{ name: 'Test Item', size: 'M', color: 'Black', qty: 1, price: 5000 }],
+        subtotal: 5000,
+        shipping: 2000,
+        total: 7000,
+        delivery: { fullName: 'Test User', address: 'Test Address', location: 'Abuja' },
+        payment: 'card',
+      }
+    });
+    res.json({ ok: true, message: 'Email sent' });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // Create order
 router.post('/', async (req, res, next) => {
   try {
     const data = orderSchema.parse(req.body);
     const order = await Order.create(data);
 
-    // Send emails (don't block response if email fails)
-    Promise.all([
-        sendOrderConfirmation({ to: data.customerEmail, order: order.toJSON() }),
-        sendAdminOrderAlert({ order: order.toJSON() }),
-      ]).catch((e) => console.error('[email] failed:', e.message, e.stack));
+    sendOrderConfirmation({ to: data.customerEmail, order: order.toJSON() })
+      .then(() => console.log('[email] confirmation sent to', data.customerEmail))
+      .catch((e) => console.error('[email] confirmation failed:', e.message));
+
+    sendAdminOrderAlert({ order: order.toJSON() })
+      .then(() => console.log('[email] admin alert sent'))
+      .catch((e) => console.error('[email] admin alert failed:', e.message));
 
     res.status(201).json(order);
   } catch (e) { next(e); }
@@ -49,12 +75,12 @@ router.post('/', async (req, res, next) => {
 
 // Get orders for a user
 router.get('/my', requireAuth, async (req, res, next) => {
-    try {
-      const userId = req.user._id.toString();
-      const orders = await Order.find({ userId }).sort({ createdAt: -1 });
-      res.json(orders);
-    } catch (e) { next(e); }
-  });
+  try {
+    const userId = req.user._id.toString();
+    const orders = await Order.find({ userId }).sort({ createdAt: -1 });
+    res.json(orders);
+  } catch (e) { next(e); }
+});
 
 // Admin - get all orders
 router.get('/', requireAuth, requireAdmin, async (req, res, next) => {
@@ -74,10 +100,7 @@ router.patch('/:id/status', requireAuth, requireAdmin, async (req, res, next) =>
   } catch (e) { next(e); }
 });
 
-import Paystack from 'paystack';
-
-const paystack = Paystack(process.env.PAYSTACK_SECRET_KEY);
-
+// Verify Paystack payment
 router.get('/verify/:reference', async (req, res, next) => {
   try {
     const { data } = await paystack.transaction.verify(req.params.reference);
