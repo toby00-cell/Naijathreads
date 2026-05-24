@@ -8,6 +8,7 @@ export type ApiProduct = {
   price: number;
   originalPrice?: number | null;
   image: string;
+  images?: string[];
   brand: string;
   sizes: string[];
   colors: string[];
@@ -34,14 +35,26 @@ export const productsApi = {
   create: (body: Partial<ApiProduct>) => apiRequest<ApiProduct>("/api/products", { method: "POST", body }),
   update: (id: string, body: Partial<ApiProduct>) => apiRequest<ApiProduct>(`/api/products/${id}`, { method: "PATCH", body }),
   remove: (id: string) => apiRequest<{ ok: true }>(`/api/products/${id}`, { method: "DELETE" }),
+
   uploadImage: async (file: File) => {
     const fd = new FormData();
     fd.append("image", file);
     return apiRequest<{ url: string; publicId: string }>("/api/uploads/image", { method: "POST", body: fd });
   },
+
   replaceProductImage: async (id: string, file: File) => {
     const fd = new FormData();
     fd.append("image", file);
     return apiRequest<ApiProduct>(`/api/products/${id}/image`, { method: "POST", body: fd });
+  },
+
+  addProductImage: async (id: string, file: File) => {
+    const fd = new FormData();
+    fd.append("image", file);
+    return apiRequest<ApiProduct>(`/api/products/${id}/images`, { method: "POST", body: fd });
+  },
+
+  deleteProductImage: async (id: string, index: number) => {
+    return apiRequest<ApiProduct>(`/api/products/${id}/images/${index}`, { method: "DELETE" });
   },
 };

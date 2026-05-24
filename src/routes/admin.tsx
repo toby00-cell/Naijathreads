@@ -193,8 +193,9 @@ function ProductForm({ product, onClose, onSaved }: { product: ApiProduct | null
           <div className="sm:col-span-2">
             <Field label="Description"><textarea rows={3} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className={inp} /></Field>
           </div>
+
           <div className="sm:col-span-2">
-            <span className="font-display text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Image</span>
+            <span className="font-display text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Main Image</span>
             <div className="mt-1 flex items-center gap-4">
               {imageUrl && <img src={imageUrl} alt="" className="h-20 w-20 rounded object-cover" />}
               <label className="inline-flex cursor-pointer items-center gap-2 rounded border border-dashed border-border px-4 py-2 text-xs hover:border-primary">
@@ -203,6 +204,59 @@ function ProductForm({ product, onClose, onSaved }: { product: ApiProduct | null
               </label>
             </div>
           </div>
+
+          {product && (
+            <div className="sm:col-span-2">
+              <span className="font-display text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                Additional Images ({(product.images ?? []).length}/5)
+              </span>
+              <div className="mt-2 flex flex-wrap gap-3">
+                {(product.images ?? []).map((img, i) => (
+                  <div key={i} className="relative h-20 w-20">
+                    <img src={img} alt="" className="h-full w-full rounded object-cover" />
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        if (!confirm("Remove this image?")) return;
+                        try {
+                          await productsApi.deleteProductImage(product.id, i);
+                          onSaved();
+                        } catch {
+                          setErr("Failed to delete image");
+                        }
+                      }}
+                      className="absolute -right-1 -top-1 grid h-5 w-5 place-items-center rounded-full bg-destructive text-white hover:bg-destructive/80"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </div>
+                ))}
+                {(product.images ?? []).length < 5 && (
+                  <label className="flex h-20 w-20 cursor-pointer flex-col items-center justify-center rounded border border-dashed border-border text-xs text-muted-foreground hover:border-primary hover:text-primary">
+                    <Upload className="mb-1 h-4 w-4" />
+                    Add
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={async (e) => {
+                        const f = e.target.files?.[0];
+                        if (!f) return;
+                        setBusy(true);
+                        try {
+                          await productsApi.addProductImage(product.id, f);
+                          onSaved();
+                        } catch (e2) {
+                          setErr(e2 instanceof Error ? e2.message : "Upload failed");
+                        } finally { setBusy(false); }
+                      }}
+                    />
+                  </label>
+                )}
+              </div>
+              <p className="mt-1 text-[10px] text-muted-foreground">Additional images appear in the product gallery. Max 5.</p>
+            </div>
+          )}
         </div>
 
         {err && <p className="mt-4 rounded-md border border-destructive/30 bg-destructive/5 p-3 text-xs text-destructive">{err}</p>}

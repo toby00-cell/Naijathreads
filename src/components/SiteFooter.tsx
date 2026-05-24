@@ -68,7 +68,7 @@ export function SiteFooter() {
           <h4 className="font-display text-sm font-semibold uppercase tracking-wide text-primary">Visit</h4>
           <p className="mt-4 text-sm opacity-80">
             14 Adeola Odeku Street<br />
-            Victoria Island, Lagos<br />
+            Efab Plaza, Abuja<br />
             Mon–Sat · 9am–8pm
           </p>
         </div>
