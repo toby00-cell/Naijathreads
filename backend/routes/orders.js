@@ -3,9 +3,12 @@ import { z } from 'zod';
 import Order from '../models/Order.js';
 import { requireAuth, requireAdmin } from '../middleware/auth.js';
 import { sendOrderConfirmation, sendAdminOrderAlert } from '../utils/email.js';
-import Paystack from 'paystack';
+import { createRequire } from 'module';
 
+const require = createRequire(import.meta.url);
+const Paystack = require('paystack');
 const paystack = Paystack(process.env.PAYSTACK_SECRET_KEY);
+
 const router = Router();
 
 const orderSchema = z.object({
@@ -35,25 +38,27 @@ const orderSchema = z.object({
 
 // Test email route
 router.get('/test-email', async (req, res, next) => {
-  try {
-    await sendOrderConfirmation({
-      to: process.env.GMAIL_USER,
-      order: {
-        id: 'TEST-001',
-        customerName: 'Test User',
-        items: [{ name: 'Test Item', size: 'M', color: 'Black', qty: 1, price: 5000 }],
-        subtotal: 5000,
-        shipping: 2000,
-        total: 7000,
-        delivery: { fullName: 'Test User', address: 'Test Address', location: 'Abuja' },
-        payment: 'card',
-      }
-    });
-    res.json({ ok: true, message: 'Email sent' });
-  } catch (e) {
-    res.status(500).json({ error: e.message });
-  }
-});
+    try {
+      await sendOrderConfirmation({
+        to: process.env.GMAIL_USER,
+        order: {
+          id: 'TEST-001',
+          customerName: 'Test User',
+          customerEmail: process.env.GMAIL_USER,
+          items: [{ name: 'Test Item', size: 'M', color: 'Black', qty: 1, price: 5000 }],
+          subtotal: 5000,
+          shipping: 2000,
+          total: 7000,
+          delivery: { fullName: 'Test User', phone: '08012345678', address: 'Test Address', location: 'Abuja — Wuse' },
+          payment: 'card',
+        }
+      });
+      res.json({ ok: true, message: 'Email sent' });
+    } catch (e) {
+      console.error('[test-email] error:', e.message);
+      res.status(500).json({ error: e.message });
+    }
+  });
 
 // Create order
 router.post('/', async (req, res, next) => {
