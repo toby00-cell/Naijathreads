@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { PRODUCTS, type Product } from "@/data/products";
+import { type ApiProduct } from "@/services/products.api";
 
 export type CartItem = {
   productId: string;
@@ -7,6 +8,8 @@ export type CartItem = {
   color: string;
   qty: number;
 };
+
+type AnyProduct = Product | ApiProduct;
 
 type CartContextValue = {
   items: CartItem[];
@@ -16,16 +19,17 @@ type CartContextValue = {
   clear: () => void;
   count: number;
   subtotal: number;
-  itemsWithProduct: (CartItem & { product: Product })[];
+  itemsWithProduct: (CartItem & { product: AnyProduct })[];
+  setApiProducts: (products: ApiProduct[]) => void;
 };
 
 const CartContext = createContext<CartContextValue | null>(null);
-
 const KEY = "naija-threads-cart-v1";
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [hydrated, setHydrated] = useState(false);
+  const [apiProducts, setApiProducts] = useState<ApiProduct[]>([]);
 
   useEffect(() => {
     try {
@@ -43,15 +47,19 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const value = useMemo<CartContextValue>(() => {
     const itemsWithProduct = items
       .map((i) => {
-        const product = PRODUCTS.find((p) => p.id === i.productId);
+        const product =
+          apiProducts.find((p) => p.id === i.productId) ??
+          PRODUCTS.find((p) => p.id === i.productId);
         return product ? { ...i, product } : null;
       })
-      .filter((x): x is CartItem & { product: Product } => x !== null);
+      .filter((x): x is CartItem & { product: AnyProduct } => x !== null);
+
     return {
       items,
       itemsWithProduct,
       count: items.reduce((s, i) => s + i.qty, 0),
       subtotal: itemsWithProduct.reduce((s, i) => s + i.product.price * i.qty, 0),
+      setApiProducts,
       add: (item) =>
         setItems((prev) => {
           const idx = prev.findIndex(
@@ -74,7 +82,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         ),
       clear: () => setItems([]),
     };
-  }, [items]);
+  }, [items, apiProducts]);
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }
