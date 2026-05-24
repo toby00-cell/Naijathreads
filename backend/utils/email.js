@@ -1,7 +1,7 @@
 import { Resend } from 'resend';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
-const FROM = 'Naija Threads <onboarding@resend.dev>';
+const FROM = 'Naija Threads <orders@naijathreads.name.ng>';
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
 
 export async function sendOrderConfirmation({ to, order }) {
