@@ -39,9 +39,9 @@ router.post('/', async (req, res, next) => {
 
     // Send emails (don't block response if email fails)
     Promise.all([
-      sendOrderConfirmation({ to: data.customerEmail, order: order.toJSON() }),
-      sendAdminOrderAlert({ order: order.toJSON() }),
-    ]).catch((e) => console.error('[email] failed:', e));
+        sendOrderConfirmation({ to: data.customerEmail, order: order.toJSON() }),
+        sendAdminOrderAlert({ order: order.toJSON() }),
+      ]).catch((e) => console.error('[email] failed:', e.message, e.stack));
 
     res.status(201).json(order);
   } catch (e) { next(e); }

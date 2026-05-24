@@ -13,6 +13,7 @@ import orderRoutes from './routes/orders.js';
 const app = express();
 
 app.use(cors({ origin: process.env.CLIENT_ORIGIN?.split(',') ?? '*', credentials: true }));
+app.set('trust proxy', 1);
 app.use(express.json({ limit: '1mb' }));
 app.use(morgan('dev'));
 
