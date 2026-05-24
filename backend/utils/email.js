@@ -1,7 +1,14 @@
-import { Resend } from 'resend';
+import nodemailer from 'nodemailer';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-const FROM = 'Naija Threads <onboarding@resend.dev>';
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.GMAIL_USER,
+    pass: process.env.GMAIL_APP_PASSWORD,
+  },
+});
+
+const FROM = `Naija Threads <${process.env.GMAIL_USER}>`;
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
 
 export async function sendOrderConfirmation({ to, order }) {
@@ -9,7 +16,7 @@ export async function sendOrderConfirmation({ to, order }) {
     `${item.name} (${item.size}, ${item.color}) x${item.qty} — ₦${item.price.toLocaleString()}`
   ).join('\n');
 
-  await resend.emails.send({
+  await transporter.sendMail({
     from: FROM,
     to,
     subject: `Order Confirmed — ${order.id}`,
@@ -31,8 +38,6 @@ Delivery to:
 ${order.delivery.fullName}
 ${order.delivery.address}, ${order.delivery.location}
 
-Payment: ${order.payment}
-
 We'll notify you once your order ships.
 
 — Naija Threads
@@ -45,7 +50,7 @@ export async function sendAdminOrderAlert({ order }) {
     `${item.name} (${item.size}, ${item.color}) x${item.qty} — ₦${item.price.toLocaleString()}`
   ).join('\n');
 
-  await resend.emails.send({
+  await transporter.sendMail({
     from: FROM,
     to: ADMIN_EMAIL,
     subject: `New Order — ${order.id} (₦${order.total.toLocaleString()})`,
