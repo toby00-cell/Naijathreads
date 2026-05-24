@@ -13,7 +13,6 @@ export const Route = createFileRoute("/checkout")({
   component: CheckoutPage,
 });
 
-// Abuja location-based delivery — same-day / next-day couriers
 export const ABUJA_LOCATIONS: { value: string; label: string; fee: number; eta: string }[] = [
   { value: "abj-wuse", label: "Abuja — Wuse", fee: 2000, eta: "Same day" },
   { value: "abj-maitama", label: "Abuja — Maitama", fee: 2000, eta: "Same day" },
@@ -44,7 +43,6 @@ const schema = z.object({
   address: z.string().trim().min(5, "Enter address").max(255),
   location: z.string().min(1, "Pick a delivery location"),
   notes: z.string().max(500).optional(),
-  payment: z.enum(["pod", "transfer", "card"]),
 });
 
 function CheckoutPage() {
@@ -59,71 +57,81 @@ function CheckoutPage() {
   const total = subtotal + shipping;
 
   const [errors, setErrors] = useState<Record<string, string>>({});
-
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-  e.preventDefault();
-  const data = Object.fromEntries(new FormData(e.currentTarget).entries());
-  const parsed = schema.safeParse(data);
-  if (!parsed.success) {
-    const errs: Record<string, string> = {};
-    parsed.error.issues.forEach((i) => { errs[i.path.join(".")] = i.message; });
-    setErrors(errs);
-    return;
-  }
-  setErrors({});
-  setSubmitting(true);
-  setSubmitError(null);
-
-  const loc = ABUJA_LOCATIONS.find((l) => l.value === parsed.data.location)!;
-  const orderData = {
-    userId: user?.id ?? "guest",
-    customerName: parsed.data.fullName,
-    customerEmail: parsed.data.email,
-    items: itemsWithProduct.map((i) => ({
-      productId: i.productId,
-      size: i.size,
-      color: i.color,
-      qty: i.qty,
-      name: i.product.name,
-      price: i.product.price,
-      image: i.product.image,
-    })),
-    subtotal,
-    shipping,
-    total,
-    delivery: {
-      fullName: parsed.data.fullName,
-      phone: parsed.data.phone,
-      address: parsed.data.address,
-      location: loc.label,
-    },
-    payment: parsed.data.payment,
-  };
-
-  try {
-    if (API_ENABLED) {
-      await ordersApi.create(orderData);
-    } else {
-      addOrder({
-        items: orderData.items,
-        subtotal,
-        shipping,
-        total,
-        delivery: orderData.delivery,
-        payment: orderData.payment,
-      });
+    e.preventDefault();
+    const data = Object.fromEntries(new FormData(e.currentTarget).entries());
+    const parsed = schema.safeParse(data);
+    if (!parsed.success) {
+      const errs: Record<string, string> = {};
+      parsed.error.issues.forEach((i) => { errs[i.path.join(".")] = i.message; });
+      setErrors(errs);
+      return;
     }
-    clear();
-    navigate({ to: "/account" });
-  } catch (err) {
-    setSubmitError(err instanceof Error ? err.message : "Failed to place order. Please try again.");
-  } finally {
-    setSubmitting(false);
-  }
-};
+    setErrors({});
+    setSubmitting(true);
+    setSubmitError(null);
+
+    const loc = ABUJA_LOCATIONS.find((l) => l.value === parsed.data.location)!;
+    const orderData = {
+      userId: user?.id ?? "guest",
+      customerName: parsed.data.fullName,
+      customerEmail: parsed.data.email,
+      items: itemsWithProduct.map((i) => ({
+        productId: i.productId,
+        size: i.size,
+        color: i.color,
+        qty: i.qty,
+        name: i.product.name,
+        price: i.product.price,
+        image: i.product.image,
+      })),
+      subtotal,
+      shipping,
+      total,
+      delivery: {
+        fullName: parsed.data.fullName,
+        phone: parsed.data.phone,
+        address: parsed.data.address,
+        location: loc.label,
+      },
+      payment: "card",
+    };
+
+    try {
+      const { default: PaystackPop } = await import("@paystack/inline-js" as any);
+      const handler = new (PaystackPop as any)();
+      handler.newTransaction({
+        key: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY,
+        email: parsed.data.email,
+        amount: total * 100,
+        currency: "NGN",
+        onSuccess: async (transaction: any) => {
+          try {
+            if (API_ENABLED) {
+              await ordersApi.create({ ...orderData, paystackReference: transaction.reference } as any);
+            } else {
+              addOrder(orderData as any);
+            }
+            clear();
+            navigate({ to: "/account" });
+          } catch (err) {
+            setSubmitError(err instanceof Error ? err.message : "Order failed after payment");
+            setSubmitting(false);
+          }
+        },
+        onCancel: () => {
+          setSubmitting(false);
+          setSubmitError("Payment was cancelled.");
+        },
+      });
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : "Failed to load Paystack");
+      setSubmitting(false);
+    }
+  };
 
   if (count === 0) {
     return (
@@ -184,23 +192,12 @@ function CheckoutPage() {
             </label>
           </Section>
 
-          <Section title="Payment Method">
-            {[
-              { value: "pod", label: "Pay on delivery (Lagos & Abuja)" },
-              { value: "transfer", label: "Bank transfer" },
-              { value: "card", label: "Card on next page" },
-            ].map((opt, i) => (
-              <label key={opt.value} className="flex cursor-pointer items-center gap-3 rounded-md border border-border bg-card p-4 hover:border-primary">
-                <input type="radio" name="payment" value={opt.value} defaultChecked={i === 0} className="accent-primary" />
-                <span className="text-sm font-medium">{opt.label}</span>
-              </label>
-            ))}
-          </Section>
           {submitError && (
-             <p className="rounded-md border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">{submitError}</p>
+            <p className="rounded-md border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">{submitError}</p>
           )}
+
           <button type="submit" disabled={submitting} className="w-full bg-primary px-6 py-4 font-display text-sm font-bold uppercase tracking-wider text-primary-foreground hover:bg-primary/90 disabled:opacity-60">
-            {submitting ? "Placing order…" : `Place Order — ${formatNGN(total)}`}
+            {submitting ? "Opening payment…" : `Pay ${formatNGN(total)} with Paystack`}
           </button>
         </form>
 
