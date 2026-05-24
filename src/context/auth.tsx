@@ -91,6 +91,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => { cancelled = true; };
   }, []);
 
+  const [apiOrders, setApiOrders] = useState<Order[]>([]);
+
+  useEffect(() => {
+    if (!API_ENABLED || !apiUser) return;
+    (async () => {
+      try {
+        const { ordersApi } = await import("@/services/orders.api");
+        const data = await ordersApi.my();
+      setApiOrders(data as unknown as Order[]);
+      } catch (e) {
+      console.error('[orders] failed to fetch:', e);
+    }
+  })();
+}, [apiUser]);
+
+
   useEffect(() => { if (hydrated && !API_ENABLED) localStorage.setItem(USERS_KEY, JSON.stringify(users)); }, [users, hydrated]);
   useEffect(() => { if (hydrated && !API_ENABLED) localStorage.setItem(SESSION_KEY, JSON.stringify(userId)); }, [userId, hydrated]);
   useEffect(() => { if (hydrated) localStorage.setItem(ORDERS_KEY, JSON.stringify(orders)); }, [orders, hydrated]);
@@ -142,7 +158,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       user,
       loading,
       isAdmin: user?.role === "admin",
-      orders: orders.filter((o) => o.userId === scopeId).sort((a, b) => b.createdAt.localeCompare(a.createdAt)),
+      orders: API_ENABLED ? apiOrders : orders.filter((o) => o.userId === scopeId).sort((a, b) => b.createdAt.localeCompare(a.createdAt)),
       signUp: API_ENABLED ? signUpApi : signUpLocal,
       signIn: API_ENABLED ? signInApi : signInLocal,
       signOut: () => {
@@ -161,7 +177,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return order;
       },
     };
-  }, [users, userId, apiUser, orders, loading]);
+  }, [users, userId, apiUser, apiOrders, orders, loading]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
