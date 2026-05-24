@@ -8,6 +8,7 @@ import authRoutes from './routes/auth.js';
 import productRoutes from './routes/products.js';
 import uploadRoutes from './routes/uploads.js';
 import { errorHandler, notFound } from './middleware/error.js';
+import orderRoutes from './routes/orders.js';
 
 const app = express();
 
@@ -22,6 +23,7 @@ app.get('/api/health', (_req, res) => res.json({ ok: true, time: new Date().toIS
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/uploads', uploadRoutes);
+app.use('/api/orders', orderRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
