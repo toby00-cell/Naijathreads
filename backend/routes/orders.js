@@ -39,6 +39,9 @@ const orderSchema = z.object({
 // Test email route
 router.get('/test-email', async (req, res, next) => {
     try {
+      console.log('[test-email] starting...');
+      console.log('[test-email] GMAIL_USER:', process.env.GMAIL_USER);
+      console.log('[test-email] GMAIL_APP_PASSWORD exists:', !!process.env.GMAIL_APP_PASSWORD);
       await sendOrderConfirmation({
         to: process.env.GMAIL_USER,
         order: {
@@ -53,13 +56,13 @@ router.get('/test-email', async (req, res, next) => {
           payment: 'card',
         }
       });
+      console.log('[test-email] done!');
       res.json({ ok: true, message: 'Email sent' });
     } catch (e) {
-      console.error('[test-email] error:', e.message);
-      res.status(500).json({ error: e.message });
+      console.error('[test-email] error:', e.message, e.stack);
+      res.status(500).json({ error: e.message, stack: e.stack });
     }
   });
-
 // Create order
 router.post('/', async (req, res, next) => {
   try {
