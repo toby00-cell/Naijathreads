@@ -14,6 +14,7 @@ const productSchema = z.object({
   price: z.coerce.number().min(0),
   originalPrice: z.coerce.number().min(0).optional().nullable(),
   image: z.string().url().optional(),
+  images: z.array(z.string().url()).max(5).optional(),
   brand: z.string().max(120).optional(),
   sizes: z.array(z.string().max(40)).max(40).optional(),
   colors: z.array(z.string().max(40)).max(40).optional(),
@@ -21,7 +22,6 @@ const productSchema = z.object({
   isNew: z.coerce.boolean().optional(),
   stock: z.coerce.number().int().min(0).optional(),
 });
-
 // ---------- Public ----------
 router.get('/', async (req, res, next) => {
   try {
@@ -103,6 +103,39 @@ router.post('/:id/image', requireAuth, requireAdmin, (req, res, next) => {
       res.json(product);
     } catch (e) { next(e); }
   });
+});
+
+// Upload additional images for a product
+router.post('/:id/images', requireAuth, requireAdmin, (req, res, next) => {
+  uploadSingleImage(req, res, async (err) => {
+    if (err) return res.status(400).json({ error: err.message });
+    if (!req.file) return res.status(400).json({ error: 'No image uploaded' });
+    try {
+      const product = await Product.findById(req.params.id);
+      if (!product) return res.status(404).json({ error: 'Product not found' });
+      if (product.images.length >= 5) return res.status(400).json({ error: 'Maximum 5 additional images allowed.' });
+      const result = await uploadBufferToCloudinary(req.file.buffer);
+      product.images.push(result.secure_url);
+      product.imagePublicIds.push(result.public_id);
+      await product.save();
+      res.json(product);
+    } catch (e) { next(e); }
+  });
+});
+
+// Delete a specific additional image
+router.delete('/:id/images/:index', requireAuth, requireAdmin, async (req, res, next) => {
+  try {
+    const product = await Product.findById(req.params.id);
+    if (!product) return res.status(404).json({ error: 'Product not found' });
+    const index = Number(req.params.index);
+    if (index < 0 || index >= product.images.length) return res.status(400).json({ error: 'Invalid image index.' });
+    await deleteFromCloudinary(product.imagePublicIds[index]);
+    product.images.splice(index, 1);
+    product.imagePublicIds.splice(index, 1);
+    await product.save();
+    res.json(product);
+  } catch (e) { next(e); }
 });
 
 export default router;

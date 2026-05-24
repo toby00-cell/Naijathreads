@@ -9,7 +9,9 @@ const productSchema = new mongoose.Schema({
   price: { type: Number, required: true, min: 0 },
   originalPrice: { type: Number, min: 0, default: null },
   image: { type: String, required: true },
-  imagePublicId: { type: String, default: null }, // for Cloudinary cleanup
+  imagePublicId: { type: String, default: null },
+  images: { type: [String], default: [] },          // additional images
+  imagePublicIds: { type: [String], default: [] },   // for Cloudinary cleanup
   brand: { type: String, default: 'Naija Threads', maxlength: 120 },
   sizes: { type: [String], default: [] },
   colors: { type: [String], default: [] },
@@ -19,9 +21,8 @@ const productSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 productSchema.index({ name: 'text', description: 'text', brand: 'text' });
-
 productSchema.virtual('id').get(function () { return this._id.toString(); });
-productSchema.set('toJSON', { virtuals: true, versionKey: false, transform: (_d, ret) => { delete ret._id; delete ret.imagePublicId; return ret; } });
+productSchema.set('toJSON', { virtuals: true, versionKey: false, transform: (_d, ret) => { delete ret._id; delete ret.imagePublicId; delete ret.imagePublicIds; return ret; } });
 
 export const CATEGORY_LIST = CATEGORIES;
 export default mongoose.model('Product', productSchema);
