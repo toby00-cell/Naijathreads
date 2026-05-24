@@ -55,7 +55,7 @@ router.get('/my', requireAuth, async (req, res, next) => {
       res.json(orders);
     } catch (e) { next(e); }
   });
-  
+
 // Admin - get all orders
 router.get('/', requireAuth, requireAdmin, async (req, res, next) => {
   try {
@@ -71,6 +71,18 @@ router.patch('/:id/status', requireAuth, requireAdmin, async (req, res, next) =>
     const order = await Order.findByIdAndUpdate(req.params.id, { status }, { new: true });
     if (!order) return res.status(404).json({ error: 'Order not found' });
     res.json(order);
+  } catch (e) { next(e); }
+});
+
+import Paystack from 'paystack';
+
+const paystack = Paystack(process.env.PAYSTACK_SECRET_KEY);
+
+router.get('/verify/:reference', async (req, res, next) => {
+  try {
+    const { data } = await paystack.transaction.verify(req.params.reference);
+    if (data.status !== 'success') return res.status(400).json({ error: 'Payment not successful' });
+    res.json({ ok: true, data });
   } catch (e) { next(e); }
 });
 
