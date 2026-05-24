@@ -104,7 +104,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.error('[orders] failed to fetch:', e);
     }
   })();
-}, [apiUser]);
+  }, [apiUser?.id]);
 
 
   useEffect(() => { if (hydrated && !API_ENABLED) localStorage.setItem(USERS_KEY, JSON.stringify(users)); }, [users, hydrated]);

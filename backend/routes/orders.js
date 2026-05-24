@@ -49,12 +49,13 @@ router.post('/', async (req, res, next) => {
 
 // Get orders for a user
 router.get('/my', requireAuth, async (req, res, next) => {
-  try {
-    const orders = await Order.find({ userId: req.user._id.toString() }).sort({ createdAt: -1 });
-    res.json(orders);
-  } catch (e) { next(e); }
-});
-
+    try {
+      const userId = req.user._id.toString();
+      const orders = await Order.find({ userId }).sort({ createdAt: -1 });
+      res.json(orders);
+    } catch (e) { next(e); }
+  });
+  
 // Admin - get all orders
 router.get('/', requireAuth, requireAdmin, async (req, res, next) => {
   try {
