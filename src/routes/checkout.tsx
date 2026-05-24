@@ -5,6 +5,8 @@ import { useCart } from "@/context/cart";
 import { useAuth } from "@/context/auth";
 import { formatNGN } from "@/data/products";
 import { MapPin } from "lucide-react";
+import { API_ENABLED } from "@/services/api";
+import { ordersApi } from "@/services/orders.api";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({ meta: [{ title: "Checkout — Naija Threads" }] }),
@@ -58,37 +60,70 @@ function CheckoutPage() {
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const data = Object.fromEntries(new FormData(e.currentTarget).entries());
-    const parsed = schema.safeParse(data);
-    if (!parsed.success) {
-      const errs: Record<string, string> = {};
-      parsed.error.issues.forEach((i) => { errs[i.path.join(".")] = i.message; });
-      setErrors(errs);
-      return;
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
+  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  e.preventDefault();
+  const data = Object.fromEntries(new FormData(e.currentTarget).entries());
+  const parsed = schema.safeParse(data);
+  if (!parsed.success) {
+    const errs: Record<string, string> = {};
+    parsed.error.issues.forEach((i) => { errs[i.path.join(".")] = i.message; });
+    setErrors(errs);
+    return;
+  }
+  setErrors({});
+  setSubmitting(true);
+  setSubmitError(null);
+
+  const loc = ABUJA_LOCATIONS.find((l) => l.value === parsed.data.location)!;
+  const orderData = {
+    userId: user?.id ?? "guest",
+    customerName: parsed.data.fullName,
+    customerEmail: parsed.data.email,
+    items: itemsWithProduct.map((i) => ({
+      productId: i.productId,
+      size: i.size,
+      color: i.color,
+      qty: i.qty,
+      name: i.product.name,
+      price: i.product.price,
+      image: i.product.image,
+    })),
+    subtotal,
+    shipping,
+    total,
+    delivery: {
+      fullName: parsed.data.fullName,
+      phone: parsed.data.phone,
+      address: parsed.data.address,
+      location: loc.label,
+    },
+    payment: parsed.data.payment,
+  };
+
+  try {
+    if (API_ENABLED) {
+      await ordersApi.create(orderData);
+    } else {
+      addOrder({
+        items: orderData.items,
+        subtotal,
+        shipping,
+        total,
+        delivery: orderData.delivery,
+        payment: orderData.payment,
+      });
     }
-    setErrors({});
-    const loc = ABUJA_LOCATIONS.find((l) => l.value === parsed.data.location)!;
-    addOrder({
-      items: itemsWithProduct.map((i) => ({
-        productId: i.productId, size: i.size, color: i.color, qty: i.qty,
-        name: i.product.name, price: i.product.price, image: i.product.image,
-      })),
-      subtotal,
-      shipping,
-      total,
-      delivery: {
-        fullName: parsed.data.fullName,
-        phone: parsed.data.phone,
-        address: parsed.data.address,
-        location: loc.label,
-      },
-      payment: parsed.data.payment,
-    });
     clear();
     navigate({ to: "/account" });
-  };
+  } catch (err) {
+    setSubmitError(err instanceof Error ? err.message : "Failed to place order. Please try again.");
+  } finally {
+    setSubmitting(false);
+  }
+};
 
   if (count === 0) {
     return (
@@ -161,9 +196,11 @@ function CheckoutPage() {
               </label>
             ))}
           </Section>
-
-          <button type="submit" className="w-full bg-primary px-6 py-4 font-display text-sm font-bold uppercase tracking-wider text-primary-foreground hover:bg-primary/90">
-            Place Order — {formatNGN(total)}
+          {submitError && (
+             <p className="rounded-md border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">{submitError}</p>
+          )}
+          <button type="submit" disabled={submitting} className="w-full bg-primary px-6 py-4 font-display text-sm font-bold uppercase tracking-wider text-primary-foreground hover:bg-primary/90 disabled:opacity-60">
+            {submitting ? "Placing order…" : `Place Order — ${formatNGN(total)}`}
           </button>
         </form>
 
