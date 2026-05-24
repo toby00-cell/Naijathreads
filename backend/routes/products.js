@@ -53,12 +53,15 @@ router.get('/slug/:slug', async (req, res, next) => {
 
 router.get('/:id', async (req, res, next) => {
   try {
+    const mongoose = await import('mongoose');
+    if (!mongoose.default.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(404).json({ error: 'Product not found' });
+    }
     const p = await Product.findById(req.params.id);
     if (!p) return res.status(404).json({ error: 'Product not found' });
     res.json(p);
   } catch (e) { next(e); }
 });
-
 // ---------- Admin ----------
 router.post('/', requireAuth, requireAdmin, async (req, res, next) => {
   try {
