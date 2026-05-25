@@ -78,6 +78,17 @@ export function SiteFooter() {
           <span>© {new Date().getFullYear()} Naija Threads. All rights reserved.</span>
         </div>
       </div>
+
+      <div className="border-t border-white/10">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-5 text-xs opacity-60">
+          <span>© {new Date().getFullYear()} Naija Threads. All rights reserved.</span>
+          <div className="flex gap-4">
+            <Link to="/privacy" className="hover:text-primary">Privacy Policy</Link>
+            <Link to="/terms" className="hover:text-primary">Terms & Conditions</Link>
+          </div>
+        </div>
+      </div>
     </footer>
+
   );
 }

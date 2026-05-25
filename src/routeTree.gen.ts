@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as UnderwearRouteImport } from './routes/underwear'
 import { Route as TrousersRouteImport } from './routes/trousers'
+import { Route as TermsRouteImport } from './routes/terms'
 import { Route as SizeGuideRouteImport } from './routes/size-guide'
 import { Route as ShopRouteImport } from './routes/shop'
 import { Route as ShoesRouteImport } from './routes/shoes'
@@ -18,6 +19,7 @@ import { Route as ShirtsRouteImport } from './routes/shirts'
 import { Route as ShippingRouteImport } from './routes/shipping'
 import { Route as SaleRouteImport } from './routes/sale'
 import { Route as ReturnsRouteImport } from './routes/returns'
+import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as HeadwearsRouteImport } from './routes/headwears'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as CheckoutRouteImport } from './routes/checkout'
@@ -35,6 +37,11 @@ const UnderwearRoute = UnderwearRouteImport.update({
 const TrousersRoute = TrousersRouteImport.update({
   id: '/trousers',
   path: '/trousers',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SizeGuideRoute = SizeGuideRouteImport.update({
@@ -70,6 +77,11 @@ const SaleRoute = SaleRouteImport.update({
 const ReturnsRoute = ReturnsRouteImport.update({
   id: '/returns',
   path: '/returns',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HeadwearsRoute = HeadwearsRouteImport.update({
@@ -121,6 +133,7 @@ export interface FileRoutesByFullPath {
   '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
   '/headwears': typeof HeadwearsRoute
+  '/privacy': typeof PrivacyRoute
   '/returns': typeof ReturnsRoute
   '/sale': typeof SaleRoute
   '/shipping': typeof ShippingRoute
@@ -128,6 +141,7 @@ export interface FileRoutesByFullPath {
   '/shoes': typeof ShoesRoute
   '/shop': typeof ShopRoute
   '/size-guide': typeof SizeGuideRoute
+  '/terms': typeof TermsRoute
   '/trousers': typeof TrousersRoute
   '/underwear': typeof UnderwearRoute
   '/product/$id': typeof ProductIdRoute
@@ -140,6 +154,7 @@ export interface FileRoutesByTo {
   '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
   '/headwears': typeof HeadwearsRoute
+  '/privacy': typeof PrivacyRoute
   '/returns': typeof ReturnsRoute
   '/sale': typeof SaleRoute
   '/shipping': typeof ShippingRoute
@@ -147,6 +162,7 @@ export interface FileRoutesByTo {
   '/shoes': typeof ShoesRoute
   '/shop': typeof ShopRoute
   '/size-guide': typeof SizeGuideRoute
+  '/terms': typeof TermsRoute
   '/trousers': typeof TrousersRoute
   '/underwear': typeof UnderwearRoute
   '/product/$id': typeof ProductIdRoute
@@ -160,6 +176,7 @@ export interface FileRoutesById {
   '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
   '/headwears': typeof HeadwearsRoute
+  '/privacy': typeof PrivacyRoute
   '/returns': typeof ReturnsRoute
   '/sale': typeof SaleRoute
   '/shipping': typeof ShippingRoute
@@ -167,6 +184,7 @@ export interface FileRoutesById {
   '/shoes': typeof ShoesRoute
   '/shop': typeof ShopRoute
   '/size-guide': typeof SizeGuideRoute
+  '/terms': typeof TermsRoute
   '/trousers': typeof TrousersRoute
   '/underwear': typeof UnderwearRoute
   '/product/$id': typeof ProductIdRoute
@@ -181,6 +199,7 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/contact'
     | '/headwears'
+    | '/privacy'
     | '/returns'
     | '/sale'
     | '/shipping'
@@ -188,6 +207,7 @@ export interface FileRouteTypes {
     | '/shoes'
     | '/shop'
     | '/size-guide'
+    | '/terms'
     | '/trousers'
     | '/underwear'
     | '/product/$id'
@@ -200,6 +220,7 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/contact'
     | '/headwears'
+    | '/privacy'
     | '/returns'
     | '/sale'
     | '/shipping'
@@ -207,6 +228,7 @@ export interface FileRouteTypes {
     | '/shoes'
     | '/shop'
     | '/size-guide'
+    | '/terms'
     | '/trousers'
     | '/underwear'
     | '/product/$id'
@@ -219,6 +241,7 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/contact'
     | '/headwears'
+    | '/privacy'
     | '/returns'
     | '/sale'
     | '/shipping'
@@ -226,6 +249,7 @@ export interface FileRouteTypes {
     | '/shoes'
     | '/shop'
     | '/size-guide'
+    | '/terms'
     | '/trousers'
     | '/underwear'
     | '/product/$id'
@@ -239,6 +263,7 @@ export interface RootRouteChildren {
   CheckoutRoute: typeof CheckoutRoute
   ContactRoute: typeof ContactRoute
   HeadwearsRoute: typeof HeadwearsRoute
+  PrivacyRoute: typeof PrivacyRoute
   ReturnsRoute: typeof ReturnsRoute
   SaleRoute: typeof SaleRoute
   ShippingRoute: typeof ShippingRoute
@@ -246,6 +271,7 @@ export interface RootRouteChildren {
   ShoesRoute: typeof ShoesRoute
   ShopRoute: typeof ShopRoute
   SizeGuideRoute: typeof SizeGuideRoute
+  TermsRoute: typeof TermsRoute
   TrousersRoute: typeof TrousersRoute
   UnderwearRoute: typeof UnderwearRoute
   ProductIdRoute: typeof ProductIdRoute
@@ -265,6 +291,13 @@ declare module '@tanstack/react-router' {
       path: '/trousers'
       fullPath: '/trousers'
       preLoaderRoute: typeof TrousersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/size-guide': {
@@ -314,6 +347,13 @@ declare module '@tanstack/react-router' {
       path: '/returns'
       fullPath: '/returns'
       preLoaderRoute: typeof ReturnsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/headwears': {
@@ -383,6 +423,7 @@ const rootRouteChildren: RootRouteChildren = {
   CheckoutRoute: CheckoutRoute,
   ContactRoute: ContactRoute,
   HeadwearsRoute: HeadwearsRoute,
+  PrivacyRoute: PrivacyRoute,
   ReturnsRoute: ReturnsRoute,
   SaleRoute: SaleRoute,
   ShippingRoute: ShippingRoute,
@@ -390,6 +431,7 @@ const rootRouteChildren: RootRouteChildren = {
   ShoesRoute: ShoesRoute,
   ShopRoute: ShopRoute,
   SizeGuideRoute: SizeGuideRoute,
+  TermsRoute: TermsRoute,
   TrousersRoute: TrousersRoute,
   UnderwearRoute: UnderwearRoute,
   ProductIdRoute: ProductIdRoute,
