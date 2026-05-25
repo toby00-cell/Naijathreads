@@ -3,9 +3,10 @@ import { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/context/auth";
 import { productsApi, type ApiProduct } from "@/services/products.api";
+import { ordersApi, type ApiOrder } from "@/services/orders.api";
 import { API_ENABLED } from "@/services/api";
 import { formatNGN } from "@/data/products";
-import { Plus, Pencil, Trash2, Upload, X } from "lucide-react";
+import { Plus, Pencil, Trash2, Upload, X, Package, ChevronDown } from "lucide-react";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({ meta: [{ title: "Admin — Naija Threads" }] }),
@@ -21,7 +22,6 @@ function AdminPage() {
     return (
       <Gate title="Backend not connected">
         Set <code className="rounded bg-muted px-1.5 py-0.5">VITE_API_URL</code> in <code>.env.local</code> to your running backend, then restart the dev server.
-        See <code>backend/README.md</code> for setup.
       </Gate>
     );
   }
@@ -42,6 +42,36 @@ function Gate({ title, children }: { title: string; children: React.ReactNode })
 }
 
 function AdminDashboard() {
+  const [tab, setTab] = useState<"products" | "orders">("products");
+
+  return (
+    <section className="mx-auto max-w-7xl px-4 py-10">
+      <header className="mb-8">
+        <p className="font-display text-xs font-bold uppercase tracking-wider text-primary">Dashboard</p>
+        <h1 className="font-display text-3xl font-extrabold">Admin</h1>
+      </header>
+
+      <div className="flex gap-2 border-b border-border mb-8">
+        <button
+          onClick={() => setTab("products")}
+          className={`px-5 py-2.5 font-display text-xs font-bold uppercase tracking-wider border-b-2 -mb-px ${tab === "products" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+        >
+          Products
+        </button>
+        <button
+          onClick={() => setTab("orders")}
+          className={`px-5 py-2.5 font-display text-xs font-bold uppercase tracking-wider border-b-2 -mb-px ${tab === "orders" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+        >
+          Orders
+        </button>
+      </div>
+
+      {tab === "products" ? <ProductsTab /> : <OrdersTab />}
+    </section>
+  );
+}
+
+function ProductsTab() {
   const qc = useQueryClient();
   const { data, isLoading, error } = useQuery({
     queryKey: ["admin-products"],
@@ -56,23 +86,19 @@ function AdminDashboard() {
   });
 
   return (
-    <section className="mx-auto max-w-7xl px-4 py-10">
-      <header className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <p className="font-display text-xs font-bold uppercase tracking-wider text-primary">Dashboard</p>
-          <h1 className="font-display text-3xl font-extrabold">Products</h1>
-          <p className="mt-1 text-sm text-muted-foreground">{data?.total ?? 0} products</p>
-        </div>
+    <div>
+      <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+        <p className="text-sm text-muted-foreground">{data?.total ?? 0} products</p>
         <button onClick={() => setCreating(true)} className="inline-flex items-center gap-2 bg-primary px-5 py-2.5 font-display text-xs font-bold uppercase tracking-wider text-primary-foreground hover:bg-primary/90">
           <Plus className="h-4 w-4" /> New product
         </button>
-      </header>
+      </div>
 
       {isLoading && <p className="py-12 text-center text-sm text-muted-foreground">Loading…</p>}
       {error && <p className="rounded-md border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">{(error as Error).message}</p>}
 
       {data && (
-        <div className="mt-8 overflow-x-auto rounded-md border border-border">
+        <div className="overflow-x-auto rounded-md border border-border">
           <table className="w-full text-sm">
             <thead className="bg-muted/50 text-left font-display text-xs uppercase tracking-wider">
               <tr><th className="p-3">Image</th><th className="p-3">Name</th><th className="p-3">Category</th><th className="p-3">Price</th><th className="p-3">Stock</th><th className="p-3"></th></tr>
@@ -108,7 +134,102 @@ function AdminDashboard() {
           onSaved={() => { qc.invalidateQueries({ queryKey: ["admin-products"] }); setEditing(null); setCreating(false); }}
         />
       )}
-    </section>
+    </div>
+  );
+}
+
+function OrdersTab() {
+  const qc = useQueryClient();
+  const { data: orders, isLoading, error } = useQuery({
+    queryKey: ["admin-orders"],
+    queryFn: () => ordersApi.all(),
+  });
+
+  const updateStatus = useMutation({
+    mutationFn: ({ id, status }: { id: string; status: string }) =>
+      ordersApi.updateStatus(id, status),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["admin-orders"] }),
+  });
+
+  const statusColors: Record<string, string> = {
+    Processing: "bg-yellow-500/10 text-yellow-600 border-yellow-500/30",
+    Shipped: "bg-blue-500/10 text-blue-600 border-blue-500/30",
+    Delivered: "bg-green-500/10 text-green-600 border-green-500/30",
+  };
+
+  if (isLoading) return <p className="py-12 text-center text-sm text-muted-foreground">Loading…</p>;
+  if (error) return <p className="rounded-md border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">{(error as Error).message}</p>;
+
+  return (
+    <div>
+      <p className="text-sm text-muted-foreground mb-6">{orders?.length ?? 0} orders</p>
+
+      <div className="space-y-4">
+        {orders?.length === 0 && (
+          <div className="rounded-md border border-dashed border-border py-16 text-center">
+            <Package className="mx-auto h-8 w-8 text-muted-foreground mb-3" />
+            <p className="text-sm text-muted-foreground">No orders yet.</p>
+          </div>
+        )}
+
+        {orders?.map((order) => (
+          <div key={order.id} className="rounded-md border border-border bg-card">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border p-4">
+              <div>
+                <p className="font-display text-sm font-bold">Order {order.id.slice(-8).toUpperCase()}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {new Date(order.createdAt).toLocaleDateString("en-NG", { year: "numeric", month: "short", day: "numeric" })}
+                  {" · "}{order.customerName} · {order.customerEmail}
+                </p>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className={`rounded-full border px-3 py-1 font-display text-[10px] font-bold uppercase tracking-wider ${statusColors[order.status]}`}>
+                  {order.status}
+                </span>
+                <p className="font-display text-base font-bold text-primary">{formatNGN(order.total)}</p>
+              </div>
+            </div>
+
+            <ul className="divide-y divide-border">
+              {order.items.map((item, i) => (
+                <li key={i} className="flex items-center gap-3 p-4">
+                  <div className="h-12 w-12 shrink-0 overflow-hidden rounded bg-hero-bg">
+                    <img src={item.image} alt={item.name} className="h-full w-full object-cover" />
+                  </div>
+                  <div className="flex-1 text-sm">
+                    <p className="font-medium">{item.name}</p>
+                    <p className="text-xs text-muted-foreground">{item.size} · {item.color} · ×{item.qty}</p>
+                  </div>
+                  <p className="text-sm font-semibold">{formatNGN(item.price * item.qty)}</p>
+                </li>
+              ))}
+            </ul>
+
+            <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border p-4">
+              <div className="text-xs text-muted-foreground">
+                <p>Ship to: <span className="font-medium text-foreground">{order.delivery.fullName}</span> · {order.delivery.address}, {order.delivery.location}</p>
+                <p className="mt-1">Phone: {order.delivery.phone} · Payment: <span className="font-medium text-foreground capitalize">{order.payment}</span></p>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-muted-foreground">Update status:</span>
+                <div className="relative">
+                  <select
+                    value={order.status}
+                    onChange={(e) => updateStatus.mutate({ id: order.id, status: e.target.value })}
+                    className="appearance-none rounded-md border border-border bg-card pl-3 pr-8 py-1.5 text-xs font-medium outline-none focus:border-primary cursor-pointer"
+                  >
+                    <option value="Processing">Processing</option>
+                    <option value="Shipped">Shipped</option>
+                    <option value="Delivered">Delivered</option>
+                  </select>
+                  <ChevronDown className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground" />
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
 
