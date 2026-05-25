@@ -8,6 +8,7 @@ export type StoredUser = {
   name: string;
   email: string;
   role: "user" | "admin";
+  isVerified?: boolean;
   passwordHash?: string; // only used by the local fallback
 };
 
@@ -49,7 +50,7 @@ const hash = (s: string) => {
   return String(h);
 };
 
-const toStored = (u: ApiUser): StoredUser => ({ id: u.id, name: u.name, email: u.email, role: u.role });
+const toStored = (u: ApiUser): StoredUser => ({ id: u.id, name: u.name, email: u.email, isVerified: u.isVerified, role: u.role });
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [users, setUsers] = useState<StoredUser[]>([]);

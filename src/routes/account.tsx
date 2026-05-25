@@ -26,6 +26,11 @@ function AccountPage() {
             <h1 className="font-display text-2xl font-extrabold">{user.name}</h1>
             <p className="text-sm text-muted-foreground">{user.email}</p>
           </div>
+          {user && !user.isVerified && (
+            <div className="mt-4 rounded-md border border-yellow-500/30 bg-yellow-500/10 p-3 text-sm text-yellow-700">
+                ⚠️ Your email is not verified. Check your inbox for a verification link.
+            </div>
+         )}
         </div>
         <button onClick={signOut} className="inline-flex items-center gap-2 border border-border px-4 py-2 font-display text-xs font-bold uppercase tracking-wider hover:border-primary hover:text-primary">
           <LogOut className="h-3 w-3" /> Sign out

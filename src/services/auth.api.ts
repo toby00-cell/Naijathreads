@@ -1,6 +1,13 @@
 import { apiRequest } from "./api";
 
-export type ApiUser = { id: string; name: string; email: string; role: "user" | "admin"; createdAt?: string };
+export type ApiUser = {
+  id: string;
+  name: string;
+  email: string;
+  role: "user" | "admin";
+  isVerified?: boolean;
+  createdAt?: string;
+};
 
 export const authApi = {
   register: (body: { name: string; email: string; password: string }) =>
